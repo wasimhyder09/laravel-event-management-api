@@ -9,6 +9,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Gate;
 
 class EventController extends Controller implements HasMiddleware {
 
@@ -49,6 +50,9 @@ class EventController extends Controller implements HasMiddleware {
 
   public function update(Request $request, Event $event) {
 //    $this->authorize('update-event', $event);
+    if(Gate::denies('update-event', $event)) {
+      abort(403, 'Unauthorized action.');
+    }
     $event->update(
       $request->validate([
         'name' => 'sometimes|string|max:255',
