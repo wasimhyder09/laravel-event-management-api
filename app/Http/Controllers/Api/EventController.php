@@ -7,16 +7,19 @@ use App\Http\Resources\EventResource;
 use App\Http\Traits\CanLoadRelationships;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
-class EventController extends Controller {
+class EventController extends Controller implements HasMiddleware {
 
   use CanLoadRelationships;
 
-  private array $relations = ['user', 'attendees', 'attendees.user'];
-
-  public function __construct() {
-    $this->middleware('auth:sanctum', ['except' => ['index', 'show']]);
+  public static function middleware(): array {
+    return [
+      new Middleware('auth:sanctum', except: ['index', 'show']),
+    ];
   }
+  private array $relations = ['user', 'attendees', 'attendees.user'];
   public function index() {
 
     $query = $this->loadRelationships(Event::query());
@@ -45,6 +48,7 @@ class EventController extends Controller {
   }
 
   public function update(Request $request, Event $event) {
+//    $this->authorize('update-event', $event);
     $event->update(
       $request->validate([
         'name' => 'sometimes|string|max:255',
